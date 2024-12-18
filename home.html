@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shape Area Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            background: #ffffff;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            border-radius: 8px;
+            width: 350px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            margin: 10px 0 5px;
+            color: #555;
+        }
+
+        select, input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        input.highlight {
+            border: 2px solid #007bff;
+            background-color: #e7f1ff;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 4px;
+            margin: 5px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        h2 {
+            color: #007bff;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+    <script>
+        function updateFields() {
+            const shape = document.getElementById("shape").value;
+
+            // Hide all fields initially
+            document.querySelectorAll('.input-field').forEach(field => {
+                field.classList.add('hidden');
+                field.querySelector('input').classList.remove('highlight');
+            });
+
+            // Show and highlight only required fields
+            if (shape === "Square") {
+                document.getElementById("length-field").classList.remove('hidden');
+                document.getElementById("length-input").classList.add('highlight');
+            } else if (shape === "Rectangle") {
+                document.getElementById("length-field").classList.remove('hidden');
+                document.getElementById("width-field").classList.remove('hidden');
+                document.getElementById("length-input").classList.add('highlight');
+                document.getElementById("width-input").classList.add('highlight');
+            } else if (shape === "Triangle") {
+                document.getElementById("base-field").classList.remove('hidden');
+                document.getElementById("height-field").classList.remove('hidden');
+                document.getElementById("base-input").classList.add('highlight');
+                document.getElementById("height-input").classList.add('highlight');
+            } else if (shape === "Circle") {
+                document.getElementById("radius-field").classList.remove('hidden');
+                document.getElementById("radius-input").classList.add('highlight');
+            }
+        }
+
+        function resetForm() {
+            document.getElementById("shape").value = "";
+            updateFields();
+            document.querySelector("form").reset();
+            document.getElementById("result").classList.add("hidden");
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>Calculate Area of Shapes</h1>
+        <form method="POST">
+            {% csrf_token %}
+            <label for="shape">Select Shape:</label>
+            <select name="shape" id="shape" onchange="updateFields()" required>
+                <option value="">-- Select Shape --</option>
+                <option value="Square" {% if shape == "Square" %}selected{% endif %}>Square</option>
+                <option value="Rectangle" {% if shape == "Rectangle" %}selected{% endif %}>Rectangle</option>
+                <option value="Triangle" {% if shape == "Triangle" %}selected{% endif %}>Triangle</option>
+                <option value="Circle" {% if shape == "Circle" %}selected{% endif %}>Circle</option>
+            </select>
+
+            <!-- Input fields for dimensions -->
+            <div id="length-field" class="input-field {% if shape not in 'Square,Rectangle' %}hidden{% endif %}">
+                <label for="length">Length:</label>
+                <input type="number" step="0.01" name="length" id="length-input" value="{{ request.POST.length }}">
+            </div>
+
+            <div id="width-field" class="input-field {% if shape != 'Rectangle' %}hidden{% endif %}">
+                <label for="width">Width:</label>
+                <input type="number" step="0.01" name="width" id="width-input" value="{{ request.POST.width }}">
+            </div>
+
+            <div id="base-field" class="input-field {% if shape != 'Triangle' %}hidden{% endif %}">
+                <label for="base">Base:</label>
+                <input type="number" step="0.01" name="base" id="base-input" value="{{ request.POST.base }}">
+            </div>
+
+            <div id="height-field" class="input-field {% if shape != 'Triangle' %}hidden{% endif %}">
+                <label for="height">Height:</label>
+                <input type="number" step="0.01" name="height" id="height-input" value="{{ request.POST.height }}">
+            </div>
+
+            <div id="radius-field" class="input-field {% if shape != 'Circle' %}hidden{% endif %}">
+                <label for="radius">Radius:</label>
+                <input type="number" step="0.01" name="radius" id="radius-input" value="{{ request.POST.radius }}">
+            </div>
+
+            <button type="submit">Calculate Area</button>
+            <button type="button" onclick="resetForm()">Reset</button>
+        </form>
+
+        {% if area %}
+            <div id="result">
+                <h2>Area of {{ shape }}: {{ area }}</h2>
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>
